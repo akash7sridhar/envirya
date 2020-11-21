@@ -190,6 +190,19 @@ Resources:
       VpcId: !Ref VPC
       Port: 80
       Protocol: HTTP
+  Route53HostedZone: 
+      Type: "AWS::Route53::HostedZone"
+      Properties: 
+        HostedZoneConfig: 
+          Comment: 'My hosted zone for example.com'
+        Name: 'example.com'
+        VPCs: 
+          - 
+            VPCId: !Ref VPC
+        HostedZoneTags: 
+          - 
+            Key: 'Hosted DNS'
+            Value: 'example.com'
 
   ELBDNS:
     Type: AWS::Route53::RecordSetGroup
@@ -197,7 +210,7 @@ Resources:
       HostedZoneName: example.com.
       Comment: Zone apex alias targeted to myELB LoadBalancer.
       RecordSets:
-      - Name: test.example.com.
+      - Name: testelb.example.com.
         Type: CNAME
         AliasTarget:
          DNSName: !GetAtt 'ElasticLoadBalancer.DNSName'
@@ -207,7 +220,7 @@ Resources:
        HostedZoneName: example.com.
        Comment: Zone apex alias targeted to myELB LoadBalancer.
        RecordSets:
-       - Name: test.example.com.
+       - Name: testalb.example.com.
          Type: CNAME
          AliasTarget:
            DNSName: !GetAtt 'ApplicationLoadBalancer.DNSName'
@@ -237,8 +250,8 @@ Resources:
       PolicyDocument:
         Statement:
         - Effect: Allow
-          Action: ['cloudformation:Describe*', 'cloudformation:List*', 'cloudformation:Get*', 's3:*']
-          Resource: 'arn:aws:s3:::YOUR-BUCKET'
+          Action: ['cloudformation:Describe*', 'cloudformation:List*', 'cloudformation:Get*']
+          Resource: '*'
       Groups: [!Ref 'CFNUserGroup']
   CFNAdminPolicies:
     Type: AWS::IAM::Policy
@@ -247,8 +260,8 @@ Resources:
       PolicyDocument:
         Statement:
         - Effect: Allow
-          Action: ['cloudformation:*''s3:*']
-          Resource: 'arn:aws:s3:::YOUR-BUCKET'
+          Action: cloudformation:*
+          Resource: '*'
       Groups: [!Ref 'CFNAdminGroup']
   CFNKeys:
     Type: AWS::IAM::AccessKey
@@ -275,4 +288,3 @@ Outputs:
   SecretKey:
     Value: !GetAtt [CFNKeys, SecretAccessKey]
     Description: AWSSecretAccessKey of new IAM user
-
